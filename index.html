@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Play Yahtzee (Kniffel) - A classic dice game for two players. Roll dice, score points, and compete against a friend!"
+    />
+    <title>Yahtzee - Two Player Dice Game</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="game-container">
+      <!-- Start Screen -->
+      <div id="start-screen" class="screen active">
+        <div class="start-content">
+          <div class="logo">
+            <div class="dice-logo">
+              <span class="dice-face">⚅</span>
+              <span class="dice-face">⚄</span>
+              <span class="dice-face">⚃</span>
+            </div>
+            <h1>Yahtzee</h1>
+            <p class="tagline">The Classic Dice Game</p>
+          </div>
+
+          <div class="player-setup">
+            <div class="input-group">
+              <label for="player1-name">Player 1</label>
+              <input
+                type="text"
+                id="player1-name"
+                placeholder="Enter name"
+                maxlength="12"
+              />
+            </div>
+            <div class="input-group">
+              <label for="player2-name">Player 2</label>
+              <input
+                type="text"
+                id="player2-name"
+                placeholder="Enter name"
+                maxlength="12"
+              />
+            </div>
+          </div>
+
+          <button id="start-game-btn" class="btn primary-btn">
+            <span>Start Game</span>
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Game Screen -->
+      <div id="game-screen" class="screen">
+        <header class="game-header">
+          <div class="header-left">
+            <h2>Yahtzee</h2>
+            <span class="round-indicator"
+              >Round <span id="current-round">1</span>/13</span
+            >
+          </div>
+          <div class="header-right">
+            <button id="rules-btn" class="icon-btn" title="Rules">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                <line x1="12" y1="17" x2="12.01" y2="17" />
+              </svg>
+            </button>
+            <button id="new-game-btn" class="icon-btn" title="New Game">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                <path d="M3 3v5h5" />
+              </svg>
+            </button>
+          </div>
+        </header>
+
+        <main class="game-main">
+          <!-- Current Player Display -->
+          <div class="current-turn">
+            <div class="turn-indicator">
+              <span class="turn-label">Current Turn</span>
+              <span id="current-player-name" class="player-name-display"
+                >Player 1</span
+              >
+            </div>
+            <div class="rolls-remaining">
+              <span id="rolls-left">3</span>
+              <span class="rolls-label">rolls left</span>
+            </div>
+          </div>
+
+          <!-- Dice Area -->
+          <div class="dice-section">
+            <div class="dice-container" id="dice-container">
+              <div class="die" data-index="0" data-value="0">
+                <div class="die-face"></div>
+              </div>
+              <div class="die" data-index="1" data-value="0">
+                <div class="die-face"></div>
+              </div>
+              <div class="die" data-index="2" data-value="0">
+                <div class="die-face"></div>
+              </div>
+              <div class="die" data-index="3" data-value="0">
+                <div class="die-face"></div>
+              </div>
+              <div class="die" data-index="4" data-value="0">
+                <div class="die-face"></div>
+              </div>
+            </div>
+            <p class="dice-hint">Click dice to hold/unhold them</p>
+            <button id="roll-btn" class="btn roll-btn">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+                <circle cx="8" cy="8" r="1.5" fill="currentColor" />
+                <circle cx="16" cy="8" r="1.5" fill="currentColor" />
+                <circle cx="8" cy="16" r="1.5" fill="currentColor" />
+                <circle cx="16" cy="16" r="1.5" fill="currentColor" />
+                <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+              </svg>
+              <span>Roll Dice</span>
+            </button>
+          </div>
+
+          <!-- Scorecard -->
+          <div class="scorecard-section">
+            <div class="scorecard">
+              <div class="scorecard-header">
+                <div class="category-col">Category</div>
+                <div class="player-col" id="p1-header">Player 1</div>
+                <div class="player-col" id="p2-header">Player 2</div>
+              </div>
+
+              <!-- Upper Section -->
+              <div class="section-label">Upper Section</div>
+
+              <div class="score-row" data-category="ones">
+                <div class="category-col">
+                  <span class="category-icon">⚀</span>
+                  <span>Ones</span>
+                </div>
+                <div
+                  class="player-col score-cell"
+                  data-player="1"
+                  data-category="ones"
+                ></div>
+                <div
+                  class="player-col score-cell"
+                  data-player="2"
+                  data-category="ones"
+                ></div>
+              </div>
+
+              <div class="score-row" data-category="twos">
+                <div class="category-col">
+                  <span class="category-icon">⚁</span>
+                  <span>Twos</span>
+                </div>
+                <div
+                  class="player-col score-cell"
+                  data-player="1"
+                  data-category="twos"
+                ></div>
+                <div
+                  class="player-col score-cell"
+                  data-player="2"
+                  data-category="twos"
+                ></div>
+              </div>
+
+              <div class="score-row" data-category="threes">
+                <div class="category-col">
+                  <span class="category-icon">⚂</span>
+                  <span>Threes</span>
+                </div>
+                <div
+                  class="player-col score-cell"
+                  data-player="1"
+                  data-category="threes"
+                ></div>
+                <div
+                  class="player-col score-cell"
+                  data-player="2"
+                  data-category="threes"
+                ></div>
+              </div>
+
+              <div class="score-row" data-category="fours">
+                <div class="category-col">
+                  <span class="category-icon">⚃</span>
+                  <span>Fours</span>
+                </div>
+                <div
+                  class="player-col score-cell"
+                  data-player="1"
+                  data-category="fours"
+                ></div>
+                <div
+                  class="player-col score-cell"
+                  data-player="2"
+                  data-category="fours"
+                ></div>
+              </div>
+
+              <div class="score-row" data-category="fives">
+                <div class="category-col">
+                  <span class="category-icon">⚄</span>
+                  <span>Fives</span>
+                </div>
+                <div
+                  class="player-col score-cell"
+                  data-player="1"
+                  data-category="fives"
+                ></div>
+                <div
+                  class="player-col score-cell"
+                  data-player="2"
+                  data-category="fives"
+                ></div>
+              </div>
+
+              <div class="score-row" data-category="sixes">
+                <div class="category-col">
+                  <span class="category-icon">⚅</span>
+                  <span>Sixes</span>
+                </div>
+                <div
+                  class="player-col score-cell"
+                  data-player="1"
+                  data-category="sixes"
+                ></div>
+                <div
+                  class="player-col score-cell"
+                  data-player="2"
+                  data-category="sixes"
+                ></div>
+              </div>
+
+              <div class="score-row subtotal-row">
+                <div class="category-col"><strong>Upper Subtotal</strong></div>
+                <div class="player-col" id="p1-upper-subtotal">0</div>
+                <div class="player-col" id="p2-upper-subtotal">0</div>
+              </div>
+
+              <div class="score-row bonus-row">
+                <div class="category-col">
+                  <span class="bonus-badge">★</span>
+                  <span>Bonus (≥63)</span>
+                </div>
+                <div class="player-col" id="p1-bonus">0</div>
+                <div class="player-col" id="p2-bonus">0</div>
+              </div>
+
+              <!-- Lower Section -->
+              <div class="section-label">Lower Section</div>
+
+              <div class="score-row" data-category="threeOfKind">
+                <div class="category-col">
+                  <span class="category-icon">🎲</span>
+                  <span>Three of a Kind</span>
+                </div>
+                <div
+                  class="player-col score-cell"
+                  data-player="1"
+                  data-category="threeOfKind"
+                ></div>
+                <div
+                  class="player-col score-cell"
+                  data-player="2"
+                  data-category="threeOfKind"
+                ></div>
+              </div>
+
+              <div class="score-row" data-category="fourOfKind">
+                <div class="category-col">
+                  <span class="category-icon">🎲</span>
+                  <span>Four of a Kind</span>
+                </div>
+                <div
+                  class="player-col score-cell"
+                  data-player="1"
+                  data-category="fourOfKind"
+                ></div>
+                <div
+                  class="player-col score-cell"
+                  data-player="2"
+                  data-category="fourOfKind"
+                ></div>
+              </div>
+
+              <div class="score-row" data-category="fullHouse">
+                <div class="category-col">
+                  <span class="category-icon">🏠</span>
+                  <span>Full House</span>
+                </div>
+                <div
+                  class="player-col score-cell"
+                  data-player="1"
+                  data-category="fullHouse"
+                ></div>
+                <div
+                  class="player-col score-cell"
+                  data-player="2"
+                  data-category="fullHouse"
+                ></div>
+              </div>
+
+              <div class="score-row" data-category="smallStraight">
+                <div class="category-col">
+                  <span class="category-icon">📏</span>
+                  <span>Small Straight</span>
+                </div>
+                <div
+                  class="player-col score-cell"
+                  data-player="1"
+                  data-category="smallStraight"
+                ></div>
+                <div
+                  class="player-col score-cell"
+                  data-player="2"
+                  data-category="smallStraight"
+                ></div>
+              </div>
+
+              <div class="score-row" data-category="largeStraight">
+                <div class="category-col">
+                  <span class="category-icon">📐</span>
+                  <span>Large Straight</span>
+                </div>
+                <div
+                  class="player-col score-cell"
+                  data-player="1"
+                  data-category="largeStraight"
+                ></div>
+                <div
+                  class="player-col score-cell"
+                  data-player="2"
+                  data-category="largeStraight"
+                ></div>
+              </div>
+
+              <div class="score-row" data-category="yahtzee">
+                <div class="category-col">
+                  <span class="category-icon">🌟</span>
+                  <span>Yahtzee</span>
+                </div>
+                <div
+                  class="player-col score-cell"
+                  data-player="1"
+                  data-category="yahtzee"
+                ></div>
+                <div
+                  class="player-col score-cell"
+                  data-player="2"
+                  data-category="yahtzee"
+                ></div>
+              </div>
+
+              <div class="score-row" data-category="chance">
+                <div class="category-col">
+                  <span class="category-icon">❓</span>
+                  <span>Chance</span>
+                </div>
+                <div
+                  class="player-col score-cell"
+                  data-player="1"
+                  data-category="chance"
+                ></div>
+                <div
+                  class="player-col score-cell"
+                  data-player="2"
+                  data-category="chance"
+                ></div>
+              </div>
+
+              <div class="score-row yahtzee-bonus-row">
+                <div class="category-col">
+                  <span class="bonus-badge">★★</span>
+                  <span>Yahtzee Bonus</span>
+                </div>
+                <div class="player-col" id="p1-yahtzee-bonus">0</div>
+                <div class="player-col" id="p2-yahtzee-bonus">0</div>
+              </div>
+
+              <div class="score-row total-row">
+                <div class="category-col"><strong>Grand Total</strong></div>
+                <div class="player-col" id="p1-total">0</div>
+                <div class="player-col" id="p2-total">0</div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+
+      <!-- Rules Modal -->
+      <div id="rules-modal" class="modal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2>How to Play Yahtzee</h2>
+            <button class="close-modal" id="close-rules">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="rules-section">
+              <h3>🎯 Objective</h3>
+              <p>
+                Score the most points by rolling dice and filling in your
+                scorecard.
+              </p>
+            </div>
+
+            <div class="rules-section">
+              <h3>🎲 Gameplay</h3>
+              <ul>
+                <li>Each turn, roll up to 3 times</li>
+                <li>Click dice to hold them between rolls</li>
+                <li>After rolling, select a category to score</li>
+                <li>Each category can only be used once</li>
+              </ul>
+            </div>
+
+            <div class="rules-section">
+              <h3>📊 Upper Section</h3>
+              <ul>
+                <li><strong>Ones - Sixes:</strong> Sum of matching dice</li>
+                <li><strong>Bonus:</strong> +35 if upper section totals 63+</li>
+              </ul>
+            </div>
+
+            <div class="rules-section">
+              <h3>📊 Lower Section</h3>
+              <ul>
+                <li>
+                  <strong>Three of a Kind:</strong> Sum of all dice (need 3
+                  matching)
+                </li>
+                <li>
+                  <strong>Four of a Kind:</strong> Sum of all dice (need 4
+                  matching)
+                </li>
+                <li>
+                  <strong>Full House:</strong> 25 points (3 of one + 2 of
+                  another)
+                </li>
+                <li>
+                  <strong>Small Straight:</strong> 30 points (4 consecutive
+                  dice)
+                </li>
+                <li>
+                  <strong>Large Straight:</strong> 40 points (5 consecutive
+                  dice)
+                </li>
+                <li><strong>Yahtzee:</strong> 50 points (5 of a kind)</li>
+                <li><strong>Chance:</strong> Sum of all dice</li>
+              </ul>
+            </div>
+
+            <div class="rules-section">
+              <h3>⭐ Yahtzee Bonus</h3>
+              <p>
+                If you roll additional Yahtzees after scoring 50 in Yahtzee, you
+                get +100 bonus points each!
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Game Over Modal -->
+      <div id="gameover-modal" class="modal">
+        <div class="modal-content gameover-content">
+          <div class="confetti" id="confetti"></div>
+          <div class="trophy">🏆</div>
+          <h2 id="winner-text">Player 1 Wins!</h2>
+          <div class="final-scores">
+            <div class="final-score-card">
+              <span class="final-player-name" id="final-p1-name">Player 1</span>
+              <span class="final-score" id="final-p1-score">0</span>
+            </div>
+            <div class="vs">VS</div>
+            <div class="final-score-card">
+              <span class="final-player-name" id="final-p2-name">Player 2</span>
+              <span class="final-score" id="final-p2-score">0</span>
+            </div>
+          </div>
+          <button id="play-again-btn" class="btn primary-btn">
+            <span>Play Again</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="game.js"></script>
+  </body>
+</html>
