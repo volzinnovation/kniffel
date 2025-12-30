@@ -6,7 +6,7 @@ A beautiful, modern implementation of the classic Yahtzee dice game for two play
 ![Players](https://img.shields.io/badge/Players-2-ec4899?style=for-the-badge)
 ![Tech](https://img.shields.io/badge/Tech-HTML%20%2F%20CSS%20%2F%20JS-10b981?style=for-the-badge)
 
-![Video](Yahtzee.mp4)
+![Video](yahtzee_game_demo.webp)
 
 ## 🎲 Features
 
