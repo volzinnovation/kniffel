@@ -116,7 +116,7 @@ kniffel/
 
 ## 📄 Software License
 
-MIT License - Feel free to use, modify, and distribute! 
+MIT License - Feel free to use, modify, and distribute! Created with Claude Opus 4.5 / Google Gemini on Antigravity.
 
 ## Buy the real thing
 
