@@ -1,16 +1,17 @@
 # Yahtzee (Kniffel) - Two Player Dice Game
 
-A beautiful, modern implementation of the classic Yahtzee dice game for two players, built with vanilla HTML, CSS, and JavaScript.
+A beautiful, modern implementation of the classic Yahtzee® dice game for two players, built with vanilla HTML, CSS, and JavaScript, for educational purposes. Includes a computer opponent.
 
 ![Yahtzee Game](https://img.shields.io/badge/Game-Yahtzee-6366f1?style=for-the-badge)
 ![Players](https://img.shields.io/badge/Players-2-ec4899?style=for-the-badge)
 ![Tech](https://img.shields.io/badge/Tech-HTML%20%2F%20CSS%20%2F%20JS-10b981?style=for-the-badge)
 
-![Video](yahtzee_game_demo.webp)
+![Video](yahtzee_ai_demo.webp)
 
 ## 🎲 Features
 
 - **Two Player Gameplay** - Take turns rolling dice and competing for the highest score
+- **One Player vs. AI Gameplay** - Roll dice against your computer and compete for the highest score
 - **Beautiful Dark Theme** - Modern UI with gradients, animations, and glowing effects
 - **Interactive Dice** - Click to hold dice between rolls, visual feedback for held dice
 - **Complete Scorecard** - All 13 Yahtzee categories with automatic score calculation
@@ -113,10 +114,11 @@ kniffel/
 - Safari
 - Edge
 
-## 📄 License
+## 📄 Software License
 
-MIT License - Feel free to use, modify, and distribute!
+MIT License - Feel free to use, modify, and distribute! 
 
----
+## Buy the real thing
 
-Made with 🎲 for dice game enthusiasts
+Yahtzee is registered trademark of Hasbro (which bought Milton Bradley). It was first marketed under the name of Yahtzee by game entrepreneur Edwin S. Lowe in 1956. 
+
