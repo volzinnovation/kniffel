@@ -14,6 +14,7 @@ A beautiful, modern implementation of the classic Yahtzee® dice game for two pl
 - **One Player vs. AI Gameplay** - Roll dice against your computer and compete for the highest score
 - **Beautiful Dark Theme** - Modern UI with gradients, animations, and glowing effects
 - **Interactive Dice** - Click to hold dice between rolls, visual feedback for held dice
+- **Move Coach** - Toggleable scoring advisor that ranks open categories and suggests holds
 - **Complete Scorecard** - All 13 Yahtzee categories with automatic score calculation
 - **Bonus Scoring** - Upper section bonus (35 points for 63+) and Yahtzee bonus (100 points)
 - **Responsive Design** - Plays great on desktop, tablet, and mobile
@@ -24,9 +25,10 @@ A beautiful, modern implementation of the classic Yahtzee® dice game for two pl
 1. **Enter player names** and click "Start Game"
 2. **Roll the dice** - You get 3 rolls per turn
 3. **Click dice to hold** them between rolls
-4. **Select a category** to score after rolling
-5. **Take turns** until all 13 categories are filled
-6. **Highest score wins!**
+4. **Use the Move Coach** if you want a hint for holds or category choice
+5. **Select a category** to score after rolling
+6. **Take turns** until all 13 categories are filled
+7. **Highest score wins!**
 
 ## 📊 Scoring Categories
 
@@ -107,6 +109,16 @@ kniffel/
 - **JavaScript ES6** - Classes, arrow functions, template literals
 - **Google Fonts** - Outfit font family
 
+## ✅ Checks
+
+Run the local regression checks with Node:
+
+```bash
+node --check game.js
+node tests/bonus.test.js
+node tests/advisor.test.js
+```
+
 ## 📱 Browser Support
 
 - Chrome (recommended)
@@ -121,4 +133,3 @@ MIT License - Feel free to use, modify, and distribute! Created with Claude Opus
 ## Buy the real thing
 
 Yahtzee is registered trademark of Hasbro (which bought Milton Bradley). It was first marketed under the name of Yahtzee by game entrepreneur Edwin S. Lowe in 1956. 
-

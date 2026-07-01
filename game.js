@@ -347,6 +347,146 @@ class YahtzeeAI {
   }
 }
 
+class YahtzeeCoach {
+  constructor(game) {
+    this.game = game;
+    this.scorer = new YahtzeeAI(game);
+  }
+
+  getAvailableCategories(playerIndex = this.game.currentPlayer) {
+    const scores = this.game.players[playerIndex].scores;
+    return this.game.categories.filter((category) => !scores.hasOwnProperty(category));
+  }
+
+  analyze(
+    dice = this.game.dice,
+    playerIndex = this.game.currentPlayer,
+    rollsLeft = this.game.rollsLeft,
+  ) {
+    const hasRolled = dice.some((value) => value > 0) && rollsLeft < 3;
+    if (!hasRolled) {
+      return {
+        state: "waiting",
+        summary: "Roll first. The coach will compare every open category after the dice land.",
+        holds: [false, false, false, false, false],
+        options: [],
+      };
+    }
+
+    const categories = this.getAvailableCategories(playerIndex);
+    const scores = this.game.players[playerIndex].scores;
+    const options = categories
+      .map((category) => {
+        const score = this.scorer.calculateScoreForDice(dice, category);
+        const value = this.scorer.getCategoryValue(category, score, scores);
+        return {
+          category,
+          label: this.categoryLabel(category),
+          score,
+          value,
+          reason: this.reasonForCategory(category, score, value, scores),
+        };
+      })
+      .sort((a, b) => b.value - a.value || b.score - a.score || a.label.localeCompare(b.label));
+
+    const holds = rollsLeft > 0 ? this.recommendHolds(dice, categories) : [true, true, true, true, true];
+    const keptValues = dice.filter((_, index) => holds[index]);
+    const best = options[0];
+    const holdText = rollsLeft > 0
+      ? (keptValues.length ? `Hold ${keptValues.join(", ")} and roll ${5 - keptValues.length} dice.` : "Re-roll all dice.")
+      : "No rolls left. Score the best open category.";
+
+    return {
+      state: "ready",
+      summary: best
+        ? `${best.label} leads now for ${best.score} points. ${holdText}`
+        : "No open categories remain.",
+      holds,
+      keptValues,
+      options: options.slice(0, 4),
+    };
+  }
+
+  recommendHolds(dice, availableCategories) {
+    const counts = this.getDiceCounts(dice);
+    const held = [false, false, false, false, false];
+    const maxCount = Math.max(...counts);
+    const bestFace = counts.lastIndexOf(maxCount);
+
+    if (availableCategories.includes("yahtzee") && maxCount >= 3) {
+      dice.forEach((value, index) => {
+        if (value === bestFace) held[index] = true;
+      });
+      return held;
+    }
+
+    const straightRun = this.bestStraightRun(dice);
+    if (
+      straightRun.length >= 4 &&
+      (availableCategories.includes("largeStraight") || availableCategories.includes("smallStraight"))
+    ) {
+      const used = new Set();
+      dice.forEach((value, index) => {
+        if (straightRun.includes(value) && !used.has(value)) {
+          held[index] = true;
+          used.add(value);
+        }
+      });
+      return held;
+    }
+
+    if (maxCount >= 2) {
+      dice.forEach((value, index) => {
+        if (value === bestFace) held[index] = true;
+      });
+    }
+    return held;
+  }
+
+  bestStraightRun(dice) {
+    const unique = [...new Set(dice)].sort((a, b) => a - b);
+    const runs = [
+      [1, 2, 3, 4, 5],
+      [2, 3, 4, 5, 6],
+      [1, 2, 3, 4],
+      [2, 3, 4, 5],
+      [3, 4, 5, 6],
+    ];
+    return runs
+      .map((run) => run.filter((value) => unique.includes(value)))
+      .sort((a, b) => b.length - a.length || b.reduce((sum, value) => sum + value, 0) - a.reduce((sum, value) => sum + value, 0))[0];
+  }
+
+  getDiceCounts(dice) {
+    const counts = [0, 0, 0, 0, 0, 0, 0];
+    dice.forEach((value) => counts[value]++);
+    return counts;
+  }
+
+  categoryLabel(category) {
+    if (typeof this.game.getCategoryDisplayName === "function") {
+      return this.game.getCategoryDisplayName(category);
+    }
+    return category;
+  }
+
+  reasonForCategory(category, score, value, scores) {
+    const upperCategories = ["ones", "twos", "threes", "fours", "fives", "sixes"];
+    if (category === "yahtzee" && score === 50) return "Lock in the 50-point swing.";
+    if (category === "largeStraight" && score === 40) return "A completed straight is usually worth taking.";
+    if (category === "smallStraight" && score === 30) return "Solid fixed points with low risk.";
+    if (category === "fullHouse" && score === 25) return "A made full house beats chasing uncertain dice.";
+    if (upperCategories.includes(category)) {
+      const currentUpper = upperCategories.reduce((total, cat) => total + (scores[cat] || 0), 0);
+      if (currentUpper < 63 && currentUpper + score >= 63) return "This secures the upper-section bonus.";
+      if (value > score) return "This keeps the upper bonus pace alive.";
+    }
+    if (score === 0) return "Use only as a sacrifice if the alternatives are worse.";
+    if (category === "chance") return "Flexible fallback when structured categories are weak.";
+    return "Best current blend of points and category value.";
+  }
+}
+
 class YahtzeeGame {
   constructor() {
     this.players = [
@@ -360,6 +500,8 @@ class YahtzeeGame {
     this.round = 1;
     this.gameMode = "human"; // "human" or "computer"
     this.ai = new YahtzeeAI(this);
+    this.coach = new YahtzeeCoach(this);
+    this.coachEnabled = true;
     this.isAITurn = false;
     this.categories = [
       "ones",
@@ -400,6 +542,11 @@ class YahtzeeGame {
     this.aiStatusText = document.getElementById("ai-status-text");
     this.diceHint = document.getElementById("dice-hint");
     this.player2InputGroup = document.getElementById("player2-input-group");
+    this.coachPanel = document.getElementById("coach-panel");
+    this.coachToggle = document.getElementById("coach-toggle");
+    this.coachSummary = document.getElementById("coach-summary");
+    this.coachHolds = document.getElementById("coach-holds");
+    this.coachOptions = document.getElementById("coach-options");
 
     // Game Mode Buttons
     this.modeHumanBtn = document.getElementById("mode-human");
@@ -415,6 +562,7 @@ class YahtzeeGame {
     this.rulesModal.addEventListener("click", (e) => {
       if (e.target === this.rulesModal) this.hideRules();
     });
+    this.coachToggle.addEventListener("click", () => this.toggleCoach());
 
     // Game Mode Selection
     this.modeHumanBtn.addEventListener("click", () => this.setGameMode("human"));
@@ -472,6 +620,7 @@ class YahtzeeGame {
 
     this.startScreen.classList.remove("active");
     this.gameScreen.classList.add("active");
+    this.updateCoach();
   }
 
   resetTurn() {
@@ -481,6 +630,7 @@ class YahtzeeGame {
     this.updateDiceDisplay();
     this.updateAvailableCategories();
     this.rollBtn.disabled = false;
+    this.updateCoach();
   }
 
   rollDice() {
@@ -508,6 +658,7 @@ class YahtzeeGame {
       this.updateDiceDisplay();
       this.rollsLeftDisplay.textContent = this.rollsLeft;
       this.updateAvailableCategories();
+      this.updateCoach();
 
       diceElements.forEach((die) => die.classList.remove("rolling"));
 
@@ -523,6 +674,7 @@ class YahtzeeGame {
     if (this.rollsLeft === 3 || this.dice[index] === 0) return;
     this.held[index] = !this.held[index];
     this.updateDiceDisplay();
+    this.updateCoach();
   }
 
   updateDiceDisplay() {
@@ -700,6 +852,7 @@ class YahtzeeGame {
     cell.textContent = score;
 
     this.updateTotals();
+    this.updateCoach();
     this.nextTurn();
   }
 
@@ -785,6 +938,7 @@ class YahtzeeGame {
     this.roundDisplay.textContent = this.round;
     this.resetTurn();
     this.updateDisplay();
+    this.updateCoach();
 
     // If it's AI's turn, start AI play
     if (this.gameMode === "computer" && this.currentPlayer === 1) {
@@ -968,6 +1122,50 @@ class YahtzeeGame {
         cell.classList.toggle("active-player-cell", isCurrentPlayerCell);
       });
     });
+  }
+
+  toggleCoach() {
+    this.coachEnabled = !this.coachEnabled;
+    this.coachToggle.textContent = this.coachEnabled ? "On" : "Off";
+    this.coachToggle.setAttribute("aria-pressed", String(this.coachEnabled));
+    this.coachPanel.classList.toggle("coach-disabled", !this.coachEnabled);
+    this.updateCoach();
+  }
+
+  updateCoach() {
+    if (!this.coachSummary || !this.coachHolds || !this.coachOptions) return;
+    if (!this.coachEnabled) {
+      this.coachSummary.textContent = "Coach is off. Turn it on when you want a hint.";
+      this.coachHolds.innerHTML = "";
+      this.coachOptions.innerHTML = "";
+      return;
+    }
+    if (this.gameMode === "computer" && this.currentPlayer === 1) {
+      this.coachSummary.textContent = "Computer turn in progress. Coach returns on your turn.";
+      this.coachHolds.innerHTML = "";
+      this.coachOptions.innerHTML = "";
+      return;
+    }
+
+    const analysis = this.coach.analyze();
+    this.coachSummary.textContent = analysis.summary;
+    this.coachHolds.innerHTML = analysis.holds
+      .map((hold, index) => {
+        const value = this.dice[index] || "-";
+        return `<span class="${hold ? "hold" : ""}">${value}</span>`;
+      })
+      .join("");
+    this.coachOptions.innerHTML = analysis.options
+      .map((option, index) => `
+        <article class="coach-option ${index === 0 ? "best" : ""}">
+          <div>
+            <strong>${option.label}</strong>
+            <small>${option.reason}</small>
+          </div>
+          <span>${option.score}</span>
+        </article>
+      `)
+      .join("");
   }
 
   endGame() {
